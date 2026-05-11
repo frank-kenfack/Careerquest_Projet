@@ -1,0 +1,18 @@
+# Environnements virtuels
+venv/
+env/
+__pycache__/
+
+# Fichiers d'environnement (Securite)
+.env
+
+# Base de donn‚es locale
+db.sqlite3
+
+# Frontend (Node.js)
+frontend/node_modules/
+frontend/dist/
+
+# Mac / Windows system files
+.DS_Store
+Thumbs.db
