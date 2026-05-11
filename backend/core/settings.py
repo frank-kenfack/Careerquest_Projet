@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'core', # Application principale
     'missions',
+    'avatars',
 ]
 
 MIDDLEWARE = [
