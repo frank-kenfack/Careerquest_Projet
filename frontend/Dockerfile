@@ -1,11 +1,11 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
 # Copier les fichiers de dependances
 COPY package*.json ./
 
-# Installer les d‚pendances
+# Installer les dï¿½pendances
 RUN npm install
 
 # Copier le reste du code

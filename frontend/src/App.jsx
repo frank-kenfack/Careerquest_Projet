@@ -1,121 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // 1. On prepare une "boite" (state) pour ranger nos missions
+  const [missions, setMissions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // 2. On utilise useEffect pour aller chercher les donnees au chargement de la page
+  useEffect(() => {
+    // On appelle notre API Django
+    axios.get('http://localhost:8000/api/missions/')
+      .then((response) => {
+        // On range les donnees recues dans notre boite
+        setMissions(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des missions:", error);
+        setLoading(false);
+      });
+  }, []); // Le tableau vide [] signifie "Fais-le une seule fois au demarrage"
+
+  // 3. Ce qu'on affiche e l'ecran
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <h1> Tableau des Missions - CareerQuest</h1>
+      
+      {loading ? (
+        <p>Chargement des quêtes depuis le serveur...</p>
+      ) : (
+        <div style={{ display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+          {/* On boucle sur chaque mission pour l'afficher */}
+          {missions.map((mission) => (
+            <div key={mission.id} style={{ 
+              border: '1px solid #ccc', 
+              padding: '15px', 
+              borderRadius: '8px',
+              backgroundColor: '#f9f9f9'
+            }}>
+              <h2 style={{ marginTop: 0, color: '#2c3e50' }}>{mission.title}</h2>
+              <span style={{ 
+                backgroundColor: '#3498db', 
+                color: 'white', 
+                padding: '4px 8px', 
+                borderRadius: '4px',
+                fontSize: '0.8em'
+              }}>
+                {mission.quest_type_display}
+              </span>
+              <span style={{ 
+                marginLeft: '10px',
+                color: '#27ae60',
+                fontWeight: 'bold'
+              }}>
+                 {mission.xp_reward} XP
+              </span>
+              <p>{mission.description}</p>
+            </div>
+          ))}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
