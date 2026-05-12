@@ -2,64 +2,97 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function App() {
-  // 1. On prepare une "boite" (state) pour ranger nos missions
   const [missions, setMissions] = useState([]);
+  const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 2. On utilise useEffect pour aller chercher les donnees au chargement de la page
   useEffect(() => {
-    // On appelle notre API Django
-    axios.get('http://localhost:8000/api/missions/')
-      .then((response) => {
-        // On range les donnees recues dans notre boite
-        setMissions(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Erreur lors de la récupération des missions:", error);
-        setLoading(false);
-      });
-  }, []); // Le tableau vide [] signifie "Fais-le une seule fois au demarrage"
+    // On lance les deux requêtes en même temps pour aller plus vite !
+    Promise.all([
+      axios.get('http://localhost:8000/api/missions/'),
+      axios.get('http://localhost:8000/api/avatars/')
+    ])
+    .then(([missionsResponse, avatarsResponse]) => {
+      setMissions(missionsResponse.data);
+      // On prend le premier avatar de la liste pour simuler l'utilisateur connecté
+      if (avatarsResponse.data.length > 0) {
+        setAvatar(avatarsResponse.data[0]);
+      }
+      setLoading(false);
+    })
+    .catch((error) => {
+      console.error("Erreur de communication avec l'API:", error);
+      setLoading(false);
+    });
+  }, []);
 
-  // 3. Ce qu'on affiche e l'ecran
+  if (loading) return <div style={{ padding: '20px' }}>Chargement du jeu...</div>;
+
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1> Tableau des Missions - CareerQuest</h1>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ textAlign: 'center', color: '#2c3e50' }}>🚀 CareerQuest</h1>
       
-      {loading ? (
-        <p>Chargement des quêtes depuis le serveur...</p>
-      ) : (
-        <div style={{ display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-          {/* On boucle sur chaque mission pour l'afficher */}
-          {missions.map((mission) => (
-            <div key={mission.id} style={{ 
-              border: '1px solid #ccc', 
-              padding: '15px', 
-              borderRadius: '8px',
-              backgroundColor: '#f9f9f9'
-            }}>
-              <h2 style={{ marginTop: 0, color: '#2c3e50' }}>{mission.title}</h2>
-              <span style={{ 
-                backgroundColor: '#3498db', 
-                color: 'white', 
-                padding: '4px 8px', 
-                borderRadius: '4px',
-                fontSize: '0.8em'
-              }}>
-                {mission.quest_type_display}
-              </span>
-              <span style={{ 
-                marginLeft: '10px',
-                color: '#27ae60',
-                fontWeight: 'bold'
-              }}>
-                 {mission.xp_reward} XP
-              </span>
-              <p>{mission.description}</p>
-            </div>
-          ))}
+      {/* --- SECTION AVATAR --- */}
+      {avatar && (
+        <div style={{ 
+          backgroundColor: '#2c3e50', 
+          color: 'white', 
+          padding: '20px', 
+          borderRadius: '10px',
+          marginBottom: '30px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div>
+            <h2 style={{ margin: '0 0 10px 0' }}>👤 {avatar.user.username}</h2>
+            <p style={{ margin: 0, color: '#bdc3c7' }}>Apparence : {avatar.appearance_display}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <h2 style={{ margin: '0 0 5px 0', color: '#f1c40f' }}>Niveau {avatar.level}</h2>
+            <p style={{ margin: 0, fontWeight: 'bold' }}>✨ {avatar.current_xp} XP</p>
+          </div>
         </div>
       )}
+
+      {/* --- SECTION MISSIONS --- */}
+      <h2 style={{ color: '#34495e' }}>📜 Quêtes Disponibles</h2>
+      <div style={{ display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+        {missions.map((mission) => (
+          <div key={mission.id} style={{ 
+            border: '1px solid #e0e0e0', 
+            padding: '20px', 
+            borderRadius: '8px',
+            backgroundColor: 'white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}>
+            <h3 style={{ marginTop: 0, color: '#2980b9' }}>{mission.title}</h3>
+            <div style={{ marginBottom: '15px' }}>
+              <span style={{ backgroundColor: '#ecf0f1', color: '#7f8c8d', padding: '4px 8px', borderRadius: '4px', fontSize: '0.85em', marginRight: '10px' }}>
+                {mission.quest_type_display}
+              </span>
+              <span style={{ color: '#27ae60', fontWeight: 'bold', fontSize: '0.9em' }}>
+                + {mission.xp_reward} XP
+              </span>
+            </div>
+            <p style={{ color: '#555', fontSize: '0.95em', lineHeight: '1.5' }}>{mission.description}</p>
+            
+            <button style={{
+              width: '100%',
+              padding: '10px',
+              backgroundColor: '#3498db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              marginTop: '10px'
+            }}>
+              Accomplir la mission
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
