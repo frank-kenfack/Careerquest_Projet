@@ -91,7 +91,7 @@ DATABASES = {
 }
 
 # Autorise le Frontend (React) a communiquer avec Django
-CORS_ALLOW_ALL_ORIGINS = True # Pour le d‚veloppement/hackathon
+CORS_ALLOW_ALL_ORIGINS = True # Pour le dï¿½veloppement/hackathon
 
 
 # Password validation
@@ -129,3 +129,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Configuration de Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
